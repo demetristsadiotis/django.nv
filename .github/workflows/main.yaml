@@ -56,6 +56,28 @@ jobs:
           path: oast-results.json
         if: always()                        # what is this for?
 
+  fossa:
+    runs-on: ubuntu-20.04
+    needs: oast
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install FOSSA
+        run: |
+          curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install-latest.sh | bash
+
+      - name: Set FOSSA API Key
+        env:
+          FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
+        run: echo "FOSSA_API_KEY=${FOSSA_API_KEY}" >> $GITHUB_ENV
+
+      - name: Run FOSSA Analysis
+        run: fossa analyze
+
+      - name: Run FOSSA Test
+        run: fossa test
+        
   integration:
     runs-on: ubuntu-20.04
     needs: oast
